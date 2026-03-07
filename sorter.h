@@ -15,6 +15,7 @@
 #ifndef _SORTER_H
 #define _SORTER_H
 
+#include <stdexcept>
 #include <string>
 #include <cstddef>
 #include <vector>
@@ -39,28 +40,29 @@ void sorter(std::vector<T> &items, std::size_t k) {
         return;
     }
 
-    // Efficiency: Cap k at the size of the vector
-    if (k > items.size()) {
-        k = items.size();
+    // Adjust k if it's larger than the number of elements
+    std::size_t actual_k = k;
+    if (actual_k > items.size()) {
+        actual_k = items.size();
     }
 
     std::size_t n = items.size();
-    std::vector<std::vector<T>> partitions(k);
+    std::vector<std::vector<T>> partitions(actual_k);
 
-    // Split logic (Round-robin)
+    // --- Split Step (Round Robin) ---
     for (std::size_t i = 0; i < n; i++) {
-        partitions[i % k].push_back(items[i]);
+        partitions[i % actual_k].push_back(items[i]);
     }
 
-    // Recursion
-    for (std::size_t i = 0; i < k; i++) {
-        sorter(partitions[i], k);
+    // --- Recursive Step ---
+    for (std::size_t i = 0; i < actual_k; i++) {
+        sorter(partitions[i], k); // Keep passing the original k for deeper levels
     }
 
-    // Merge logic (Max-elements approach)
+    // --- Merge Step (Max Elements) ---
     for (int i = static_cast<int>(n) - 1; i >= 0; i--) {
         int max_idx = -1;
-        for (std::size_t j = 0; j < k; j++) {
+        for (std::size_t j = 0; j < actual_k; j++) {
             if (!partitions[j].empty()) {
                 if (max_idx == -1 || partitions[j].back() > partitions[max_idx].back()) {
                     max_idx = static_cast<int>(j);
@@ -71,5 +73,5 @@ void sorter(std::vector<T> &items, std::size_t k) {
         partitions[max_idx].pop_back();
     }
 }
-#endif
 
+#endif
